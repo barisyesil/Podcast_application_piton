@@ -5,9 +5,13 @@ import 'package:just_audio/just_audio.dart';
 import 'dart:async';
 
 class NowPlayingScreen extends StatefulWidget {
-  final Podcast podcast;
-
-  const NowPlayingScreen({super.key, required this.podcast});
+  final List<Podcast> podcasts;
+  final int initialIndex;
+  const NowPlayingScreen({
+    super.key,
+    required this.podcasts,
+    required this.initialIndex,
+  });
 
   @override
   State<NowPlayingScreen> createState() => _NowPlayingScreenState();
@@ -15,12 +19,14 @@ class NowPlayingScreen extends StatefulWidget {
 
 class _NowPlayingScreenState extends State<NowPlayingScreen> {
   late AudioPlayer _audioPlayer;
+  late int currentIndex;
+  late Podcast currentPodcast;
   StreamSubscription<Duration>? _positionSubscription;
   StreamSubscription<Duration?>? _durationSubscription;
 
 
   bool isPlaying = true;
-  bool _isSeeking= false;
+  bool _isSeeking = false;
   Duration currentTime = const Duration(seconds: 0);
   Duration totalTime = const Duration(minutes: 42, seconds: 17);
 
@@ -28,12 +34,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    currentIndex = widget.initialIndex;
+    currentPodcast = widget.podcasts[currentIndex];
     _initAudio();
   }
 
   void _initAudio() async {
     try {
-      await _audioPlayer.setAsset(widget.podcast.audioUrl);
+      await _audioPlayer.setAsset(currentPodcast.audioUrl);
+      _audioPlayer.play();
 
       _durationSubscription = _audioPlayer.durationStream.listen((duration) {
         if (duration != null) {
@@ -51,11 +60,23 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
     }
   }
 
+  void _playPodcastAtIndex(int index) async {
+    if (index < 0 || index >= widget.podcasts.length) return; // sınır kontrolü
+
+    setState(() {
+      currentIndex = index;
+      currentPodcast = widget.podcasts[currentIndex];
+    });
+
+    await _audioPlayer.setAsset(currentPodcast.audioUrl);
+    _audioPlayer.play();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF191717),
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -77,7 +98,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.asset(
-                widget.podcast.imageUrl,
+                currentPodcast.imageUrl,
                 width: 200,
                 height: 200,
                 fit: BoxFit.cover,
@@ -85,21 +106,21 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             ),
             const SizedBox(height: 20),
             Text(
-              widget.podcast.title,
-              style: const TextStyle(fontSize: 22, color: Colors.grey, fontWeight: FontWeight.bold),
+              currentPodcast.title,
+              style: const TextStyle(fontSize: 22,color: Colors.grey, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              widget.podcast.author,
+              currentPodcast.author,
               style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
             const SizedBox(height: 24),
-            // Progress bar
-            // Progress bar - ekolayzır stili
-            // Progress bar - interaktif slider
+
+            // İlerleme Çubuğu ve Süreler
             Column(
               children: [
+                // Slider (kullanıcının oynatma pozisyonunu değiştirmesi için)
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     activeTrackColor: Colors.deepPurpleAccent,
@@ -127,7 +148,37 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                     },
                   ),
                 ),
+
+                const SizedBox(height: 10),
+
+                // Ekolyzer tarzı animasyonlu ilerleme çubuğu
+                SizedBox(
+                  height: 30,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(20, (index) {
+                      // Burada yüksekliği biraz animasyon gibi yapabiliriz.
+                      // Örneğin currentTime ile orantılı yapalım:
+                      final progressRatio = currentTime.inSeconds / (totalTime.inSeconds == 0 ? 1 : totalTime.inSeconds);
+                      // Çubukların yüksekliklerini biraz hareketli yapalım:
+                      final baseHeight = (index % 5 + 1) * 6.0;
+                      // progressRatio ile yüksekliği ölçekleyelim, minimum 3.0 yüksekliğinde olsun
+                      final height = (baseHeight * (0.3 + 0.7 * progressRatio)).clamp(3.0, baseHeight);
+                      return Container(
+                        width: 4,
+                        height: height,
+                        decoration: BoxDecoration(
+                          color: Colors.deepPurpleAccent,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+
                 const SizedBox(height: 8),
+
+                // Süre göstergeleri
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -138,14 +189,15 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
               ],
             ),
 
-
             const Spacer(),
+
+            // Kontrol Butonları
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 IconButton(
                   onPressed: () {
-                    // önceki podcast
+                    _playPodcastAtIndex(currentIndex - 1);
                   },
                   icon: const Icon(Icons.skip_previous, size: 40, color: Colors.white),
                 ),
@@ -153,9 +205,13 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                 IconButton(
                   onPressed: () {
                     setState(() {
+                      if (isPlaying) {
+                        _audioPlayer.pause();
+                      } else {
+                        _audioPlayer.play();
+                      }
                       isPlaying = !isPlaying;
                     });
-                    isPlaying ? _audioPlayer.play() : _audioPlayer.pause();
                   },
                   icon: Icon(
                     isPlaying ? Icons.pause_circle_filled : Icons.play_circle_fill,
@@ -163,12 +219,10 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                     color: Colors.white,
                   ),
                 ),
-
-
                 const SizedBox(width: 20),
                 IconButton(
                   onPressed: () {
-                    // sonraki podcast
+                    _playPodcastAtIndex(currentIndex + 1);
                   },
                   icon: const Icon(Icons.skip_next, size: 40, color: Colors.white),
                 ),
@@ -180,6 +234,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       ),
     );
   }
+
   @override
   void dispose() {
     _audioPlayer.dispose();

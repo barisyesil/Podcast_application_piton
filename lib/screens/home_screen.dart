@@ -176,9 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => NowPlayingScreen(podcast: podcast),
+                              builder: (_) => NowPlayingScreen(
+                                podcasts: filteredPodcasts, // Tüm filtrelenmiş podcast listesi
+                                initialIndex: index,         // Seçilen podcast'in indexi
+                              ),
                             ),
                           );
+
                         },
                         child: Card(
                           color: const Color(0xFF1E1E1E),
