@@ -2,28 +2,72 @@ import 'package:flutter/material.dart';
 import 'package:music_application_piton/models/podcast.dart';
 import 'now_playing_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    //final Size size = MediaQuery.of(context).size;
-    final List<String> categories = ["Comedy", "News", "Music", "Tech", "Sports", "Education"];
-    final List<Podcast> trendingPodcasts = [
-      Podcast(
-        title: 'Barış Özcan ile 111 Hz-episode-Her Şeyin Bir Yaşı Var mıdır_',
-        author: 'Barış Özcan',
-        imageUrl: 'assets/images/baris_ozcan.jpeg',
-        audioUrl: 'assets/audios/baris_ozcan_111hz_1.mp3',
-      ),
-      Podcast(
-        title: 'Ahlakın Felsefesi',
-        author: 'Portal',
-        imageUrl: 'assets/images/Portal.jpg',
-        audioUrl: 'assets/audios/Ahlakın Felsefesi.m4a',
-      ),
-    ];
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+class _HomeScreenState extends State<HomeScreen> {
+  final List<String> categories = ["All","Comedy", "News", "Music", "Tech", "Sports", "Education"];
+  String selectedCategory = "";
+  final TextEditingController _searchController = TextEditingController();
 
+  final List<Podcast> allPodcasts = [
+    Podcast(
+      title: 'Barış Özcan ile 111 Hz-episode-Her Şeyin Bir Yaşı Var mıdır_',
+      author: 'Barış Özcan',
+      imageUrl: 'assets/images/baris_ozcan.jpeg',
+      audioUrl: 'assets/audios/baris_ozcan_111hz_1.mp3',
+      category: 'Tech',
+    ),
+    Podcast(
+      title: 'Ahlakın Felsefesi',
+      author: 'Portal',
+      imageUrl: 'assets/images/Portal.jpg',
+      audioUrl: 'assets/audios/Ahlakın Felsefesi.m4a',
+      category: 'Education',
+    ),
+  ];
+
+  List<Podcast> filteredPodcasts = [];
+
+  @override
+  void initState() {
+    super.initState();
+    filteredPodcasts = allPodcasts;
+  }
+
+  void _filterPodcasts(String query) {
+    setState(() {
+      filteredPodcasts = allPodcasts.where((podcast) {
+        final matchesCategory = selectedCategory == "All" || podcast.category == selectedCategory;
+        final matchesSearch = podcast.title.toLowerCase().contains(query.toLowerCase()) ||
+            podcast.author.toLowerCase().contains(query.toLowerCase());
+        return matchesCategory && matchesSearch;
+      }).toList();
+    });
+  }
+
+
+
+  void _filterByCategory(String category) {
+    setState(() {
+      selectedCategory = category;
+      filteredPodcasts = allPodcasts.where((podcast) {
+        final matchesCategory = category == "All" || podcast.category == category;
+        final matchesSearch = podcast.title.toLowerCase().contains(_searchController.text.toLowerCase()) ||
+            podcast.author.toLowerCase().contains(_searchController.text.toLowerCase());
+        return matchesCategory && matchesSearch;
+      }).toList();
+    });
+  }
+
+
+
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF121212), // Spotify koyu tonu
       body: SafeArea(
@@ -50,6 +94,7 @@ class HomeScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: TextField(
+                controller: _searchController,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Ara...",
@@ -62,7 +107,9 @@ class HomeScreen extends StatelessWidget {
                     borderSide: BorderSide.none,
                   ),
                 ),
+                onChanged: _filterPodcasts,
               ),
+
             ),
             const SizedBox(height: 10),
 
@@ -74,21 +121,30 @@ class HomeScreen extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    margin: const EdgeInsets.only(right: 10),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFCF9645), // Spotify yeşili
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      categories[index],
-                      style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+                  final category = categories[index];
+                  final isSelected = category == selectedCategory;
+                  return GestureDetector(
+                    onTap: () => _filterByCategory(category),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? const Color(0xFFCF9645) : Colors.grey[800],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        category,
+                        style: TextStyle(
+                          color: isSelected ? Colors.black : Colors.white70,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   );
                 },
               ),
             ),
+
             const SizedBox(height: 20),
 
             // Trending Başlığı
@@ -106,15 +162,15 @@ class HomeScreen extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: GridView.builder(
-                  itemCount: trendingPodcasts.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    itemCount: filteredPodcasts.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
                     childAspectRatio: 3 / 4,
                   ),
                     itemBuilder: (context, index) {
-                      final podcast = trendingPodcasts[index];
+                      final podcast = filteredPodcasts[index];
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -157,8 +213,19 @@ class HomeScreen extends StatelessWidget {
         unselectedItemColor: Colors.white70,
         currentIndex: 0,
         onTap: (index) {
-          // Sayfalar arası geçiş burada yapılabilir
+          switch (index) {
+            case 0:
+              print("Discover tıklandı");
+              break;
+            case 1:
+              print("Library tıklandı");
+              break;
+            case 2:
+              print("Profile tıklandı");
+              break;
+          }
         },
+
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Discover"),
           BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),

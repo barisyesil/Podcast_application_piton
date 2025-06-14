@@ -85,7 +85,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             const SizedBox(height: 20),
             Text(
               widget.podcast.title,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, color: Colors.grey, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),

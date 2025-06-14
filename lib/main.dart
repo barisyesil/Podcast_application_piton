@@ -11,15 +11,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Music App',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: kPrimaryColor,
-        scaffoldBackgroundColor: Colors.white,
-        colorScheme: ColorScheme.fromSeed(seedColor: kPrimaryColor).copyWith(
-          secondary: kPrimaryLightColor,
-        ),
-      ),
+
       home: const LoginScreen(),
     );
   }

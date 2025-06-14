@@ -1,78 +1,67 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // Gerekli yolu kendi klasör yapına göre ayarla
+import 'home_screen.dart'; // Gerekli dosya yolunu ayarla
 
-// Figma'daki renkleri burada tanımlayabilirsiniz
-const kPrimaryColor = Color(0xFF6F35A5); // Örnek bir renk
-const kPrimaryLightColor = Color(0xFFF1E6FF); // Örnek bir renk
+// ---- Renk Teması ----
+const kDarkBackground = Color(0xFF121212);
+const kInputFill = Color(0xFF1E1E1E);
+const kAccentColor = Color(0xFFCF9645);
+const kTextColor = Colors.white;
+const kHintColor = Colors.white60;
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size; // Cihazın ekran boyutunu almak için
+    Size size = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: SingleChildScrollView( // Klavye açıldığında taşmayı önlemek için
+      backgroundColor: kDarkBackground,
+      body: SingleChildScrollView(
         child: SizedBox(
           width: double.infinity,
           height: size.height,
-          // Arka planı Figma'daki gibi ayarlayabilirsiniz
-          // decoration: BoxDecoration(
-          //   image: DecorationImage(
-          //     image: AssetImage("assets/images/background.png"), // Eğer bir arka plan görseli varsa
-          //     fit: BoxFit.cover,
-          //   ),
-          // ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              // Uygulama Adı veya Logo
               const Text(
-                "GİRİŞ YAP",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+                "PODKES",
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 28,
+                  color: kAccentColor,
+                ),
               ),
-              SizedBox(height: size.height * 0.03), // Boşluk
+              const SizedBox(height: 10),
+              const Text(
+                "Giriş Yap",
+                style: TextStyle(
+                  color: kTextColor,
+                  fontSize: 20,
+                ),
+              ),
+              SizedBox(height: size.height * 0.05),
 
-              // Figma'da bir görsel varsa ekleyebilirsiniz
-              // SvgPicture.asset(
-              //   "assets/icons/login.svg", // Örnek SVG
-              //   height: size.height * 0.35,
-              // ),
-              // SizedBox(height: size.height * 0.03),
-
-              // E-posta Giriş Alanı
               RoundedInputField(
                 hintText: "E-posta Adresiniz",
                 onChanged: (value) {},
               ),
-              SizedBox(height: size.height * 0.01),
-
-              // Şifre Giriş Alanı
               RoundedPasswordField(
                 onChanged: (value) {},
               ),
-              SizedBox(height: size.height * 0.02),
-
-              // Giriş Butonu
-            RoundedButton(
-              text: "GİRİŞ YAP",
-              press: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomeScreen()),
-                );
-              },
-            ),
-
-              SizedBox(height: size.height * 0.03),
-
-              // Zaten hesabın var mı? Kayıt ol
+              RoundedButton(
+                text: "GİRİŞ YAP",
+                press: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeScreen()),
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
               AlreadyHaveAnAccountCheck(
                 press: () {
-                  // Kayıt ol ekranına yönlendirme
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => SignUpScreen()));
-
+                  // Kayıt ol ekranına yönlendir
                 },
               ),
             ],
@@ -83,7 +72,28 @@ class LoginScreen extends StatelessWidget {
   }
 }
 
-// Tekrar kullanılabilir bir giriş alanı widget'ı
+// ---- Giriş Alanı Container ----
+class TextFieldContainer extends StatelessWidget {
+  final Widget child;
+  const TextFieldContainer({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      width: size.width * 0.8,
+      decoration: BoxDecoration(
+        color: kInputFill,
+        borderRadius: BorderRadius.circular(29),
+      ),
+      child: child,
+    );
+  }
+}
+
+// ---- E-posta Giriş Alanı ----
 class RoundedInputField extends StatelessWidget {
   final String hintText;
   final IconData icon;
@@ -92,7 +102,7 @@ class RoundedInputField extends StatelessWidget {
   const RoundedInputField({
     super.key,
     required this.hintText,
-    this.icon = Icons.email, // Varsayılan ikon
+    this.icon = Icons.email,
     required this.onChanged,
   });
 
@@ -101,13 +111,12 @@ class RoundedInputField extends StatelessWidget {
     return TextFieldContainer(
       child: TextField(
         onChanged: onChanged,
-        cursorColor: kPrimaryColor,
+        cursorColor: kAccentColor,
+        style: const TextStyle(color: kTextColor),
         decoration: InputDecoration(
-          icon: Icon(
-            icon,
-            color: kPrimaryColor,
-          ),
+          icon: Icon(icon, color: kAccentColor),
           hintText: hintText,
+          hintStyle: const TextStyle(color: kHintColor),
           border: InputBorder.none,
         ),
       ),
@@ -115,13 +124,10 @@ class RoundedInputField extends StatelessWidget {
   }
 }
 
-// Tekrar kullanılabilir bir şifre alanı widget'ı
+// ---- Şifre Giriş Alanı ----
 class RoundedPasswordField extends StatefulWidget {
   final ValueChanged<String> onChanged;
-  const RoundedPasswordField({
-    super.key,
-    required this.onChanged,
-  });
+  const RoundedPasswordField({super.key, required this.onChanged});
 
   @override
   State<RoundedPasswordField> createState() => _RoundedPasswordFieldState();
@@ -136,17 +142,16 @@ class _RoundedPasswordFieldState extends State<RoundedPasswordField> {
       child: TextField(
         obscureText: _isObscure,
         onChanged: widget.onChanged,
-        cursorColor: kPrimaryColor,
+        cursorColor: kAccentColor,
+        style: const TextStyle(color: kTextColor),
         decoration: InputDecoration(
           hintText: "Şifre",
-          icon: const Icon(
-            Icons.lock,
-            color: kPrimaryColor,
-          ),
+          hintStyle: const TextStyle(color: kHintColor),
+          icon: const Icon(Icons.lock, color: kAccentColor),
           suffixIcon: IconButton(
             icon: Icon(
               _isObscure ? Icons.visibility : Icons.visibility_off,
-              color: kPrimaryColor,
+              color: kAccentColor,
             ),
             onPressed: () {
               setState(() {
@@ -161,18 +166,18 @@ class _RoundedPasswordFieldState extends State<RoundedPasswordField> {
   }
 }
 
-
-// Tekrar kullanılabilir bir buton widget'ı
+// ---- Giriş Butonu ----
 class RoundedButton extends StatelessWidget {
   final String text;
   final VoidCallback press;
   final Color color, textColor;
+
   const RoundedButton({
     super.key,
     required this.text,
     required this.press,
-    this.color = kPrimaryColor,
-    this.textColor = Colors.white,
+    this.color = kAccentColor,
+    this.textColor = Colors.black,
   });
 
   @override
@@ -187,6 +192,8 @@ class RoundedButton extends StatelessWidget {
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 40),
             backgroundColor: color,
+            elevation: 5,
+            shadowColor: color.withOpacity(0.5),
           ),
           onPressed: press,
           child: Text(
@@ -199,10 +206,11 @@ class RoundedButton extends StatelessWidget {
   }
 }
 
-// "Zaten hesabın var mı?" widget'ı
+// ---- "Hesabın yok mu?" ----
 class AlreadyHaveAnAccountCheck extends StatelessWidget {
   final bool login;
   final VoidCallback press;
+
   const AlreadyHaveAnAccountCheck({
     super.key,
     this.login = true,
@@ -215,15 +223,15 @@ class AlreadyHaveAnAccountCheck extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text(
-          login ? "Hesabın yok mu ? " : "Zaten bir hesabın var mı ? ",
-          style: const TextStyle(color: kPrimaryColor),
+          login ? "Hesabın yok mu? " : "Zaten bir hesabın var mı? ",
+          style: const TextStyle(color: kHintColor),
         ),
         GestureDetector(
           onTap: press,
           child: Text(
             login ? "Kayıt Ol" : "Giriş Yap",
             style: const TextStyle(
-              color: kPrimaryColor,
+              color: kAccentColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -232,31 +240,3 @@ class AlreadyHaveAnAccountCheck extends StatelessWidget {
     );
   }
 }
-
-// Giriş alanlarını sarmalayan container
-class TextFieldContainer extends StatelessWidget {
-  final Widget child;
-  const TextFieldContainer({
-    super.key,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-      width: size.width * 0.8,
-      decoration: BoxDecoration(
-        color: kPrimaryLightColor,
-        borderRadius: BorderRadius.circular(29),
-      ),
-      child: child,
-    );
-  }
-}
-
-
-
-
