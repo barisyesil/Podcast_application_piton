@@ -38,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
     ),
     Podcast(
       title: 'Barış Özcan ile 111 Hz-Her Şeyin Bir Yaşı Var mıdır_',
-      author: 'Portal',
+      author: 'Barış Özcan',
       imageUrl: 'assets/images/baris_ozcan.jpeg',
       audioUrl: 'assets/audios/Barış Özcan ile 111 Hz-episode-Her Şeyin Bir Yaşı Var mıdır_.mp3',
       category: 'Education',
