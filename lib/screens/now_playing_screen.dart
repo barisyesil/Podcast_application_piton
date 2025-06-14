@@ -20,6 +20,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
 
 
   bool isPlaying = true;
+  bool _isSeeking= false;
   Duration currentTime = const Duration(seconds: 0);
   Duration totalTime = const Duration(minutes: 42, seconds: 17);
 
@@ -54,7 +55,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: const Color(0xFF191717),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -96,23 +97,34 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
             const SizedBox(height: 24),
             // Progress bar
             // Progress bar - ekolayzır stili
+            // Progress bar - interaktif slider
             Column(
               children: [
-                SizedBox(
-                  height: 30,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(20, (index) {
-                      final height = (index % 5 + 1) * 6.0;
-                      return Container(
-                        width: 4,
-                        height: height,
-                        decoration: BoxDecoration(
-                          color: Colors.deepPurpleAccent,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      );
-                    }),
+                SliderTheme(
+                  data: SliderTheme.of(context).copyWith(
+                    activeTrackColor: Colors.deepPurpleAccent,
+                    inactiveTrackColor: Colors.deepPurpleAccent.withOpacity(0.3),
+                    thumbColor: Colors.deepPurpleAccent,
+                    trackHeight: 6,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 10),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+                  ),
+                  child: Slider(
+                    min: 0,
+                    max: totalTime.inSeconds.toDouble(),
+                    value: currentTime.inSeconds.clamp(0, totalTime.inSeconds).toDouble(),
+                    onChangeStart: (value) {
+                      _isSeeking = true;
+                    },
+                    onChanged: (value) {
+                      setState(() {
+                        currentTime = Duration(seconds: value.toInt());
+                      });
+                    },
+                    onChangeEnd: (value) {
+                      _audioPlayer.seek(Duration(seconds: value.toInt()));
+                      _isSeeking = false;
+                    },
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -125,6 +137,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                 ),
               ],
             ),
+
 
             const Spacer(),
             Row(
