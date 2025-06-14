@@ -40,7 +40,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
   }
 
   void _initAudio() async {
-    try {
+
       await _audioPlayer.setAsset(currentPodcast.audioUrl);
       _audioPlayer.play();
 
@@ -55,9 +55,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
       });
 
       _audioPlayer.play();
-    } catch (e) {
-      print("Hata: $e");
-    }
+
   }
 
   void _playPodcastAtIndex(int index) async {
@@ -152,6 +150,7 @@ class _NowPlayingScreenState extends State<NowPlayingScreen> {
                 const SizedBox(height: 10),
 
                 // Ekolyzer tarzı animasyonlu ilerleme çubuğu
+                //Zaman kalırsa buradaki animasyonu kaldırıp Figmadaki tasarım gibi yap
                 SizedBox(
                   height: 30,
                   child: Row(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // Gerekli dosya yolunu ayarla
+import 'home_screen.dart';
 
 // ---- Renk Teması ----
 const kDarkBackground = Color(0xFF121212);
@@ -25,32 +25,27 @@ class LoginScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
+                //logo eklenebilir belki
                 "PODKES",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 28,
+                  fontSize: 60,
                   color: kAccentColor,
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
-                "Giriş Yap",
-                style: TextStyle(
-                  color: kTextColor,
-                  fontSize: 20,
-                ),
-              ),
+
               SizedBox(height: size.height * 0.05),
 
               RoundedInputField(
-                hintText: "E-posta Adresiniz",
+                hintText: "E-mail",
                 onChanged: (value) {},
               ),
               RoundedPasswordField(
                 onChanged: (value) {},
               ),
               RoundedButton(
-                text: "GİRİŞ YAP",
+                text: "Login",
                 press: () {
                   Navigator.pushReplacement(
                     context,
@@ -145,7 +140,7 @@ class _RoundedPasswordFieldState extends State<RoundedPasswordField> {
         cursorColor: kAccentColor,
         style: const TextStyle(color: kTextColor),
         decoration: InputDecoration(
-          hintText: "Şifre",
+          hintText: "Password",
           hintStyle: const TextStyle(color: kHintColor),
           icon: const Icon(Icons.lock, color: kAccentColor),
           suffixIcon: IconButton(
@@ -223,13 +218,13 @@ class AlreadyHaveAnAccountCheck extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Text(
-          login ? "Hesabın yok mu? " : "Zaten bir hesabın var mı? ",
+          login ? "Don't have an Account? " : "Already have an Account? ",
           style: const TextStyle(color: kHintColor),
         ),
         GestureDetector(
           onTap: press,
           child: Text(
-            login ? "Kayıt Ol" : "Giriş Yap",
+            login ? "Sign in" : "Login",
             style: const TextStyle(
               color: kAccentColor,
               fontWeight: FontWeight.bold,
